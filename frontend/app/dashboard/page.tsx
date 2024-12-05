@@ -1,14 +1,69 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, Calendar, Hourglass, TrendingUp } from "lucide-react";
+import { useAppSelector } from "../redux/store";
+import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
+import { formatDuration } from "@/lib/timeUtils";
 
 export default function Dashboard() {
   // Dummy data for demonstration
-  const timeData = {
-    remainingTime: "2h 30m",
-    workedTime: "5h 30m",
-    breakTime: "1h 00m",
-    overtimeBalance: "+3h 45m",
-  };
+  const [timeData, setTimeData] = useState({
+    remainingTime: "8h 00m",
+    workedTime: "0h 00m",
+    breakTime: "0h 00m",
+    overtimeBalance: "0h 00m",
+  });
+
+  const token = useAppSelector((state) => state.auth.token);
+
+  if (!token) {
+    redirect("/login");
+  }
+
+  useEffect(() => {
+    const fetchTimeData = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_ROOT_URL}/api/time`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const workedSeconds = data.workingTime || 0;
+          const breakSeconds = data.breakTime || 0;
+
+          // Assuming 8-hour workday
+          const remainingSeconds = Math.max(28800 - workedSeconds, 0);
+          const overtimeSeconds = Math.max(workedSeconds - 28800, 0);
+
+          setTimeData({
+            remainingTime: formatDuration(remainingSeconds),
+            workedTime: formatDuration(workedSeconds),
+            breakTime: formatDuration(breakSeconds),
+            overtimeBalance: formatDuration(overtimeSeconds),
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching time data:", error);
+      }
+    };
+
+    fetchTimeData();
+
+    // Refresh data every hour
+    const interval = setInterval(fetchTimeData, 3600000);
+
+    return () => clearInterval(interval);
+  }, [token]);
 
   return (
     <div className="space-y-4">
