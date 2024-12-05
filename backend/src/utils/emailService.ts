@@ -9,6 +9,39 @@ const transporter = nodemailer.createTransport({
   }
 })
 
+export const sendAbsenceApprovalEmail = async (userEmail: string, request: any) => {
+  const mailOptions =
+    request.status === 'APPROVED'
+      ? {
+          from: process.env.EMAIL_USER,
+          to: `${userEmail}, ${request.approvedBy.email}`,
+          subject: 'Absence Request Approved',
+          html: `
+      <h1>Request Approved</h1>
+      <p>Your absence from ${request.fromDate} to  ${request.toDate}  request has been approved
+      by  ${request.approvedBy.email} 
+      .</p>
+    `
+        }
+      : {
+          from: process.env.EMAIL_USER,
+          to: userEmail,
+          subject: 'Absence Request Denied',
+          html: `
+      <h1>Request Denied</h1>
+      <p>Your absence from ${request.fromDate} to  ${request.toDate}  request has been 
+        rejected by  ${request.approvedBy.email}
+      .</p>
+    `
+        }
+
+  try {
+    await transporter.sendMail(mailOptions)
+  } catch (error) {
+    console.error('Error sending email:', error)
+  }
+}
+
 export const sendApprovalEmail = async (userEmail: string, request: any) => {
   const mailOptions =
     request.status === 'APPROVED'
@@ -63,6 +96,39 @@ export const sendLoginNotification = async (userEmail: string, logoutEmail: bool
       <h1>Logout Alert</h1>
       <p>Your account was successfully logged out.</p>
       
+    `
+        }
+
+  try {
+    await transporter.sendMail(mailOptions)
+  } catch (error) {
+    console.error('Error sending email:', error)
+  }
+}
+
+export const sendManualTimeApprovalEmail = async (userEmail: string, request: any) => {
+  const mailOptions =
+    request.status === 'APPROVED'
+      ? {
+          from: process.env.EMAIL_USER,
+          to: `${userEmail}, ${request.approvedBy.email}`,
+          subject: 'Manual Time Request Approved',
+          html: `
+      <h1>Request Approved</h1>
+      <p>Your manual time request on ${request.date} from ${request.startTime} to ${request.endTime}  request has been approved
+      by  ${request.approvedBy.email} 
+      .</p>
+    `
+        }
+      : {
+          from: process.env.EMAIL_USER,
+          to: userEmail,
+          subject: 'Manual Time Request Denied',
+          html: `
+      <h1>Request Denied</h1>
+      <p>Your manual time request from ${request.fromDate} to  ${request.toDate}  request has been 
+        rejected by  ${request.approvedBy.email}
+      .</p>
     `
         }
 

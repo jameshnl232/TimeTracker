@@ -16,11 +16,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { redirect } from "next/navigation";
 import { User } from "@/app/redux/features/auth/auth.slice";
 import { toast } from "@/hooks/use-toast";
+import { calculateHoursWorked } from "@/lib/timeUtils";
 
-interface VacationRequest {
+interface ManualTime {
   _id: string;
-  fromDate: string;
-  toDate: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  pause: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
   comment?: string;
   approvedBy?: string;
@@ -36,7 +39,7 @@ const formatDate = (dateString: string) => {
 };
 
 export default function VacationsPage() {
-  const [requests, setRequests] = useState<VacationRequest[]>([]);
+  const [requests, setRequests] = useState<ManualTime[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,8 +57,8 @@ export default function VacationsPage() {
 
       try {
         const url = is_admin
-          ? "/api/requests/all"
-          : "/api/requests/my-requests";
+          ? "/api/manual-time/all"
+          : "/api/manual-time/my-requests";
 
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_ROOT_URL}${url}`,
@@ -86,7 +89,7 @@ export default function VacationsPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto mt-8 px-4">
-        <h1 className="mb-6 text-4xl font-bold">Vacations</h1>
+        <h1 className="mb-6 text-4xl font-bold">Manual Time</h1>
         {[...Array(3)].map((_, index) => (
           <Card key={index} className="mb-4">
             <CardHeader>
@@ -106,7 +109,7 @@ export default function VacationsPage() {
   if (error) {
     return (
       <div className="container mx-auto mt-8 px-4">
-        <h1 className="mb-6 text-4xl font-bold">Vacations</h1>
+        <h1 className="mb-6 text-4xl font-bold">Manual Time</h1>
         <Card>
           <CardContent className="flex items-center justify-center pt-5">
             <p className="text-center text-red-500">{error}</p>
@@ -118,7 +121,7 @@ export default function VacationsPage() {
 
   const actionRequestHandler = async (id: string, status: string) => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_ROOT_URL}/api/requests/approve/${id}`,
+      `${process.env.NEXT_PUBLIC_ROOT_URL}/api/manual-time/approve/${id}`,
       {
         method: "PUT",
         headers: {
@@ -163,37 +166,41 @@ export default function VacationsPage() {
 
   return (
     <div className="container mx-auto mt-8 px-4">
-      <h1 className="mb-6 text-4xl font-bold">Vacations</h1>
+      <h1 className="mb-6 text-4xl font-bold">Manual Time</h1>
       {requests && requests.length === 0 ? (
-        <p className="text-center">No vacation requests found.</p>
+        <p className="text-center">No manual time requests found.</p>
       ) : (
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Type</TableHead>
                 {is_admin && <TableHead>User</TableHead>}
-                <TableHead>Start Date</TableHead>
-                <TableHead>End Date</TableHead>
+
+                <TableHead>Date</TableHead>
+                <TableHead>Start Hour</TableHead>
+                <TableHead>End Hour</TableHead>
+                <TableHead>Pause</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Days</TableHead>
+                <TableHead>Working time</TableHead>
                 {is_admin && <TableHead>Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {requests.map((request) => (
                 <TableRow key={request._id}>
-                  <TableCell className="font-medium">Vacation</TableCell>
                   {is_admin && <TableCell>{request.user.email}</TableCell>}
-                  <TableCell>{formatDate(request.fromDate)}</TableCell>
-                  <TableCell>{formatDate(request.toDate)}</TableCell>
+                  <TableCell>{formatDate(request.date)}</TableCell>
+                  <TableCell>{request.startTime}</TableCell>
+                  <TableCell>{request.endTime}</TableCell>
+                    <TableCell>{request.pause} mins</TableCell>
                   <TableCell>{request.status}</TableCell>
-                  <TableCell className="pl-5">
-                    {Math.round(
-                      (new Date(request.toDate).getTime() -
-                        new Date(request.fromDate).getTime()) /
-                        (1000 * 60 * 60 * 24),
-                    )}
+                  <TableCell>
+                    {calculateHoursWorked(
+                      request.startTime,
+                      request.endTime,
+                      request.pause,
+                    )}{" "}
+                    hours
                   </TableCell>
                   {is_admin && (
                     <TableCell className="space-x-3">

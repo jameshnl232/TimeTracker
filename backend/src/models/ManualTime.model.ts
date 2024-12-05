@@ -1,28 +1,29 @@
 import mongoose from 'mongoose'
 
-const requestSchema = new mongoose.Schema(
+const manualTimeSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
     },
-    substitute: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+    date: {
+      type: Date,
+      required: true
     },
-    type: {
+    startTime: {
       type: String,
-      enum: ['pending', 'approved', 'rejected'],
-      default: 'pending'
+      required: true,
+  
     },
-    fromDate: {
-      type: Date,
-      required: true
+    endTime: {
+      type: String,
+      required: true,
+
     },
-    toDate: {
-      type: Date,
-      required: true
+    pause: {
+      type: Number,
+      default: 0
     },
     comment: {
       type: String,
@@ -44,4 +45,4 @@ const requestSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-export default mongoose.model('Request', requestSchema)
+export default mongoose.model('ManualTime', manualTimeSchema)

@@ -17,9 +17,11 @@ import { redirect } from "next/navigation";
 import { User } from "@/app/redux/features/auth/auth.slice";
 import { toast } from "@/hooks/use-toast";
 
-interface VacationRequest {
+interface AbsenceRequest {
   _id: string;
   fromDate: string;
+  type: string;
+  sustitute: string;
   toDate: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
   comment?: string;
@@ -36,7 +38,7 @@ const formatDate = (dateString: string) => {
 };
 
 export default function VacationsPage() {
-  const [requests, setRequests] = useState<VacationRequest[]>([]);
+  const [requests, setRequests] = useState<AbsenceRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,8 +56,8 @@ export default function VacationsPage() {
 
       try {
         const url = is_admin
-          ? "/api/requests/all"
-          : "/api/requests/my-requests";
+          ? "/api/absences/all"
+          : "/api/absences/my-requests";
 
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_ROOT_URL}${url}`,
@@ -86,7 +88,7 @@ export default function VacationsPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto mt-8 px-4">
-        <h1 className="mb-6 text-4xl font-bold">Vacations</h1>
+        <h1 className="mb-6 text-4xl font-bold">Absences</h1>
         {[...Array(3)].map((_, index) => (
           <Card key={index} className="mb-4">
             <CardHeader>
@@ -106,7 +108,7 @@ export default function VacationsPage() {
   if (error) {
     return (
       <div className="container mx-auto mt-8 px-4">
-        <h1 className="mb-6 text-4xl font-bold">Vacations</h1>
+        <h1 className="mb-6 text-4xl font-bold">Absences</h1>
         <Card>
           <CardContent className="flex items-center justify-center pt-5">
             <p className="text-center text-red-500">{error}</p>
@@ -118,7 +120,7 @@ export default function VacationsPage() {
 
   const actionRequestHandler = async (id: string, status: string) => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_ROOT_URL}/api/requests/approve/${id}`,
+      `${process.env.NEXT_PUBLIC_ROOT_URL}/api/absences/approve/${id}`,
       {
         method: "PUT",
         headers: {
@@ -173,6 +175,7 @@ export default function VacationsPage() {
               <TableRow>
                 <TableHead>Type</TableHead>
                 {is_admin && <TableHead>User</TableHead>}
+
                 <TableHead>Start Date</TableHead>
                 <TableHead>End Date</TableHead>
                 <TableHead>Status</TableHead>
@@ -183,7 +186,7 @@ export default function VacationsPage() {
             <TableBody>
               {requests.map((request) => (
                 <TableRow key={request._id}>
-                  <TableCell className="font-medium">Vacation</TableCell>
+                  <TableCell className="font-medium">{request.type}</TableCell>
                   {is_admin && <TableCell>{request.user.email}</TableCell>}
                   <TableCell>{formatDate(request.fromDate)}</TableCell>
                   <TableCell>{formatDate(request.toDate)}</TableCell>

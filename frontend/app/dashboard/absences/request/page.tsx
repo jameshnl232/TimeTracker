@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-export default function VacationRequestPage() {
+export default function AbsenceRequestPage() {
   const token = useAppSelector((state) => state.auth.token);
   const { toast } = useToast();
 
@@ -16,22 +16,25 @@ export default function VacationRequestPage() {
   const [formData, setFormData] = useState({
     fromDate: "",
     toDate: "",
+    substitute: "",
     comment: "",
   });
+
+  const [type, setType] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission here
-
+    console.log(formData);
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_ROOT_URL}/api/requests/create`,
+      `${process.env.NEXT_PUBLIC_ROOT_URL}/api/absences/create`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, type }),
       },
     );
 
@@ -40,8 +43,10 @@ export default function VacationRequestPage() {
       setFormData({
         fromDate: "",
         toDate: "",
+        substitute: "",
         comment: "",
       });
+      setType("Other");
       toast({
         variant: "success",
         description: "Request submitted successfully",
@@ -53,21 +58,44 @@ export default function VacationRequestPage() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement
+    >,
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (e.target.name === "type") {
+      setType(e.target.value);
+    } else {
+      const { name, value } = e.target;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   return (
     <div className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-6 text-3xl font-bold">Vacation Request</h1>
+      <h1 className="mb-6 text-3xl font-bold">Absense Request</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col">
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="type" className="mb-2">
+            Type
+          </label>
+          <select
+            id="type"
+            name="type"
+            value={type}
+            onChange={handleChange}
+            className="rounded border p-2"
+            required
+          >
+            <option value="Other">Other</option>
+            <option value="Sick">Sick</option>
+            <option value="Child sick">Child sick</option>
+            <option value="Homeoffice">Homeoffice</option>
+          </select>
+
           <label htmlFor="fromDate" className="mb-2">
             From Date
           </label>
@@ -91,6 +119,21 @@ export default function VacationRequestPage() {
             id="toDate"
             name="toDate"
             value={formData.toDate}
+            onChange={handleChange}
+            className="rounded border p-2"
+            required
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label htmlFor="substitute" className="mb-2">
+            Substitute
+          </label>
+          <input
+            type="text"
+            id="substitute"
+            name="substitute"
+            value={formData.substitute}
             onChange={handleChange}
             className="rounded border p-2"
             required

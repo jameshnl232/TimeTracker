@@ -7,6 +7,8 @@ import cors from 'cors'
 import authRoutes from './routes/auth.route.ts'
 import requestRoutes from './routes/request.route.ts'
 import timeRoutes from './routes/time.route.ts'
+import absenceRoutes from './routes/absence.route.ts'
+import manualTimeRoutes from './routes/manualTime.route.ts'
 
 import { connectDB } from './config/database.ts'
 import { HttpError } from './utils/error.ts'
@@ -37,6 +39,8 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/requests', requestRoutes)
 app.use('/api/time', timeRoutes)
+app.use('/api/absences', absenceRoutes)
+app.use('/api/manual-time', manualTimeRoutes)
 
 app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
   const statusCode = err.statusCode || 500

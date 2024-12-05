@@ -67,9 +67,6 @@ export default function Navbar() {
       }, 1000);
     }
 
-    console.log(breakTime)
-
-
     return () => {
       if (interval) clearInterval(interval);
     };
