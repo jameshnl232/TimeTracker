@@ -1,6 +1,6 @@
 "use client";
 import { useAppSelector } from "@/app/redux/store";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,15 +9,21 @@ export default function VacationRequestPage() {
   const token = useAppSelector((state) => state.auth.token);
   const { toast } = useToast();
 
-  if (!token) {
-    redirect("/login");
-  }
-
   const [formData, setFormData] = useState({
     fromDate: "",
     toDate: "",
     comment: "",
   });
+
+  useEffect(() => {
+    if (!token) {
+      redirect("/login");
+    }
+  }, [token]);
+
+  if (!token) {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
