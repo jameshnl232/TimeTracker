@@ -7,6 +7,10 @@
 
 This project is a full-stack application designed for managing working time, vacation requests, absence requests, and manual working time requests. It provides functionalities for two types of users: **Normal User** and **Admin User**, including email notifications and request approval workflows.
 
+### **Preview:**  
+- Frontend: https://coding-challenge-belzir.vercel.app/
+- Backend: https://codingchallengebelzir.onrender.com/
+
 ---
 
 ### 2. **Key Features**
