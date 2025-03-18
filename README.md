@@ -1,3 +1,7 @@
+![image](https://github.com/user-attachments/assets/6f97c9f3-9ee0-42f7-a87e-b4be97f09066)
+
+
+
 ### 1. **Project Overview**
 
 This project is a full-stack application designed for managing working time, vacation requests, absence requests, and manual working time requests. It provides functionalities for two types of users: **Normal User** and **Admin User**, including email notifications and request approval workflows.
